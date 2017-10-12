@@ -3,13 +3,32 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { 
+      bearing: 0,
+      location: [0, 0]
+    };
+  }
+
   componentDidMount() {
     fetch("./input.txt")
     .then(res => res.text())
     .then(data => {
-      console.log(data.split(','));
+      data.split(', ')
+      .map(instruction => this.move(instruction));
     })
   }
+
+  move(instruction) {
+    const turn = (instruction[0] === "L" ? -1 : 1);
+    const newBearing = (this.state.bearing + turn + 4) % 4
+    
+    console.log("inst: " + instruction + " turn: " + turn + " newBearing: " + newBearing);
+
+    this.setState({bearing: newBearing});
+  }
+
   render() {
     return (
       <div className="App">
