@@ -23,10 +23,27 @@ class App extends Component {
   move(instruction) {
     const turn = (instruction[0] === "L" ? -1 : 1);
     const newBearing = (this.state.bearing + turn + 4) % 4
-    
-    console.log("inst: " + instruction + " turn: " + turn + " newBearing: " + newBearing);
+    const blocks = parseInt(instruction.substring(1), 10);
+    let location = this.state.location;
 
-    this.setState({bearing: newBearing});
+    switch(newBearing) {
+      case 0:
+        location[0] += blocks;
+        break;
+      case 1:
+        location[1] += blocks;
+        break;
+      case 2:
+        location[0] -= blocks;
+        break;
+      case 3:
+        location[1] -= blocks;
+        break;
+      default:
+    }
+
+    console.log("inst: " + instruction + " turn: " + turn + " newBearing: " + newBearing + " location: " + location);
+    this.setState({bearing: newBearing, location: location});
   }
 
   render() {
