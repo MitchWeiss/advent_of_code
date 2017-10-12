@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+const [NORTH, EAST, SOUTH, WEST] = [0, 1, 2, 3]; // Assign integer values for each direction
+const [LEFT, RIGHT] = [-1, 1]; // Left turn will decrease the direction integer, opposite for right turn
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = { 
-      bearing: 0,
-      location: [0, 0],
+      bearing: NORTH,
+      x: 0,
+      y: 0,
       distance: null
     };
   }
@@ -22,35 +26,33 @@ class App extends Component {
   }
 
   calculateDistance() {
-    const location = this.state.location;
-    const distance = Math.abs(location[0]) + Math.abs(location[1]);
-    console.log(distance);
-    this.setState({ distance: distance });
+    let {x, y} = this.state;
+    this.setState({ distance: Math.abs(x) + Math.abs(y) });
   }
 
   move(instruction) {
-    const turn = (instruction[0] === "L" ? -1 : 1);
-    const newBearing = (this.state.bearing + turn + 4) % 4
+    const turn = (instruction[0] === "L" ? LEFT : RIGHT);
+    const bearing = (this.state.bearing + turn + 4) % 4;
     const blocks = parseInt(instruction.substring(1), 10);
-    let location = this.state.location;
+    let {x, y} = this.state;
 
-    switch(newBearing) {
-      case 0:
-        location[0] += blocks;
+    switch(bearing) {
+      case NORTH:
+        x += blocks;
         break;
-      case 1:
-        location[1] += blocks;
+      case EAST:
+        y += blocks;
         break;
-      case 2:
-        location[0] -= blocks;
+      case SOUTH:
+        x -= blocks;
         break;
-      case 3:
-        location[1] -= blocks;
+      case WEST:
+        y -= blocks;
         break;
       default:
     }
 
-    this.setState({bearing: newBearing, location: location});
+    this.setState({bearing: bearing, x: x, y: y});
   }
 
   render() {
