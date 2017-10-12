@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import Direction from './Direction';
+import { Line } from 'rc-progress';
 import './App.css';
 
 const [NORTH, EAST, SOUTH, WEST] = [0, 1, 2, 3]; // Assign integer values for each direction
@@ -9,10 +10,14 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = { 
+      loading: true,
+      distance: null,
+      instructions: null,
       bearing: NORTH,
       x: 0,
       y: 0,
-      distance: null
+      blocks: 0,
+      currentMove: 0
     };
   }
 
@@ -20,21 +25,33 @@ class App extends Component {
     fetch("./input.txt")
     .then(res => res.text())
     .then(data => {
-      data.split(', ').map(instruction => this.move(instruction));
-      this.calculateDistance();
+      const instructions = data.split(', ');
+      this.setState({ instructions, loading: false });
+      this.followInstructions();
     });
   }
 
   calculateDistance() {
-    let {x, y} = this.state;
+    let { x, y } = this.state;
     this.setState({ distance: Math.abs(x) + Math.abs(y) });
+  }
+
+  followInstructions() {
+    const { currentMove, instructions } = this.state;
+    this.move(instructions[currentMove]);
+    this.setState({ currentMove: currentMove+1 });
+    if(currentMove < instructions.length - 1) {
+      setTimeout(this.followInstructions.bind(this), 150);
+    } else {
+      this.calculateDistance();
+    }
   }
 
   move(instruction) {
     const turn = (instruction[0] === "L" ? LEFT : RIGHT);
     const bearing = (this.state.bearing + turn + 4) % 4;
     const blocks = parseInt(instruction.substring(1), 10);
-    let {x, y} = this.state;
+    let { x, y } = this.state;
 
     switch(bearing) {
       case NORTH:
@@ -51,20 +68,22 @@ class App extends Component {
         break;
       default:
     }
-
-    this.setState({bearing: bearing, x: x, y: y});
+    this.setState({bearing, blocks, x, y});
   }
 
   render() {
+    const { loading, currentMove, bearing, blocks, instructions, distance } = this.state
+    const percent = instructions ? Math.floor((currentMove/instructions.length)*100) : 0;
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1>Easter Bunny Hunt!</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        { loading && <h2>Tracking him down now!</h2> }
+        { !loading && <div className="loader"><Line percent={percent} strokeWidth={4} trailWidth={4} /></div> }
+        { !loading && percent !== 100 && <Direction bearing={bearing} blocks={blocks} /> }
+        { distance && <h2>Found him! He's <span className="distance">{distance}</span> blocks away!!!</h2> }
+        
       </div>
     );
   }
