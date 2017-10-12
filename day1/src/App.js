@@ -7,7 +7,8 @@ class App extends Component {
     super(props);
     this.state = { 
       bearing: 0,
-      location: [0, 0]
+      location: [0, 0],
+      distance: null
     };
   }
 
@@ -15,9 +16,16 @@ class App extends Component {
     fetch("./input.txt")
     .then(res => res.text())
     .then(data => {
-      data.split(', ')
-      .map(instruction => this.move(instruction));
-    })
+      data.split(', ').map(instruction => this.move(instruction));
+      this.calculateDistance();
+    });
+  }
+
+  calculateDistance() {
+    const location = this.state.location;
+    const distance = Math.abs(location[0]) + Math.abs(location[1]);
+    console.log(distance);
+    this.setState({ distance: distance });
   }
 
   move(instruction) {
@@ -42,7 +50,6 @@ class App extends Component {
       default:
     }
 
-    console.log("inst: " + instruction + " turn: " + turn + " newBearing: " + newBearing + " location: " + location);
     this.setState({bearing: newBearing, location: location});
   }
 
