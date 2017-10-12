@@ -3,6 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  componentDidMount() {
+    fetch("./input.txt")
+    .then(res => res.text())
+    .then(data => {
+      console.log(data.split(','));
+    })
+  }
   render() {
     return (
       <div className="App">
